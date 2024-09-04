@@ -181,23 +181,25 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
     await txRelease.wait();
   }
 
-  // Main deployment logic
+  //<------------------------------------ MAIN DEPLOYMENT LOGIC --------------------------------------->
   try {
     // Check and send ETH to supplier, retailer, and transporter
-    // await checkAndSendEth(supplier.address, "Supplier");
-    // await checkAndSendEth(retailer.address, "Retailer");
-    // await checkAndSendEth(transporter.address, "Transporter");
+    await checkAndSendEth(supplier.address, "Supplier");
+    await checkAndSendEth(retailer.address, "Retailer");
+    await checkAndSendEth(transporter.address, "Transporter");
 
+
+    //deploy contracts
     const { mockUSDT, dchain } = await deployContracts();
     if (!mockUSDT || !dchain) return;
 
     // Mint tokens to all parties
-    // await mintTokens(mockUSDT);
+    await mintTokens(mockUSDT);
 
     // Create shipments, pay for some, and deliver some
-    // await createShipments(dchain);
-    // await payForSomeShipments(dchain, mockUSDT);
-    // await deliverSomeShipments(dchain);
+    await createShipments(dchain);
+    await payForSomeShipments(dchain, mockUSDT);
+    await deliverSomeShipments(dchain);
 
     console.log(`3 public shipments and 1 private shipment created and processed.`);
   } catch (error) {
