@@ -20,8 +20,8 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   // Function to check balance, send ETH if needed, and print balance if sufficient
   async function checkAndSendEth(address: string, role: string) {
     const currentChain = hre.network.name
-    const amountToCheck = currentChain === 'rskTestnet' ? ethers.parseEther("0.0001") : ethers.parseEther("0.003")
-    const amountToSend = currentChain === 'rskTestnet' ? ethers.parseEther("0.0001") : ethers.parseEther("0.003")
+    const amountToCheck = currentChain === 'rskTestnet' ? ethers.parseEther("0.001") : ethers.parseEther("0.003")
+    const amountToSend = currentChain === 'rskTestnet' ? ethers.parseEther("0.001") : ethers.parseEther("0.003")
     const balance = await hre.ethers.provider.getBalance(address);
     const balanceInEth = ethers.formatEther(balance);
     if (balance < amountToCheck) {
@@ -184,20 +184,20 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   // Main deployment logic
   try {
     // Check and send ETH to supplier, retailer, and transporter
-    await checkAndSendEth(supplier.address, "Supplier");
-    await checkAndSendEth(retailer.address, "Retailer");
-    await checkAndSendEth(transporter.address, "Transporter");
+    // await checkAndSendEth(supplier.address, "Supplier");
+    // await checkAndSendEth(retailer.address, "Retailer");
+    // await checkAndSendEth(transporter.address, "Transporter");
 
     const { mockUSDT, dchain } = await deployContracts();
     if (!mockUSDT || !dchain) return;
 
     // Mint tokens to all parties
-    await mintTokens(mockUSDT);
+    // await mintTokens(mockUSDT);
 
     // Create shipments, pay for some, and deliver some
-    await createShipments(dchain);
-    await payForSomeShipments(dchain, mockUSDT);
-    await deliverSomeShipments(dchain);
+    // await createShipments(dchain);
+    // await payForSomeShipments(dchain, mockUSDT);
+    // await deliverSomeShipments(dchain);
 
     console.log(`3 public shipments and 1 private shipment created and processed.`);
   } catch (error) {
