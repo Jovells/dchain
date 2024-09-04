@@ -62,6 +62,11 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey, ...testAccounts],
       gasPrice: 1000000000,
     },
+    rskTestnet: {
+      url: "https://rpc.testnet.rootstock.io/GZXzs4VVEEyuW0yzd11ERyfjMuS4L0-T",
+      accounts: [deployerPrivateKey, ...testAccounts],
+      gasPrice: 1000000000,
+    },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey, ...testAccounts],
@@ -142,15 +147,30 @@ const config: HardhatUserConfig = {
   },
   // configuration for harhdat-verify plugin
   etherscan: {
-    apiKey: `${etherscanApiKey}`,
+    apiKey: {
+      etherscanApiKey: `${etherscanApiKey}`,
+      // Is not required by blockscout. Can be any non-empty string
+      rskTestnet: 'GZXzs4VVEEyuW0yzd11ERyfjMuS4L0-T',
+      rskMainnet: 'RSK_MAINNET_RPC_URL',
+      "liskSepolia": "lisk"
+    },
+
     customChains: [
       {
-        network: "lisk-sepolia",
+        network: "liskSepolia",
         chainId: 4202,
         urls: {
           apiURL: "https://sepolia-blockscout.lisk.com/api",
           browserURL: "https://sepolia-blockscout.lisk.com",
         },
+      },
+      {
+        network: "rskTestnet",
+        chainId: 31,
+        urls: {
+          apiURL: "https://rootstock-testnet.blockscout.com/api/",
+          browserURL: "https://rootstock-testnet.blockscout.com/",
+        }
       },
     ],
   },
@@ -159,6 +179,7 @@ const config: HardhatUserConfig = {
     etherscan: {
       apiKey: `${etherscanApiKey}`,
     },
+    
   },
   sourcify: {
     enabled: false,

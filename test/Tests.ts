@@ -1,18 +1,28 @@
-import { expect, } from "chai";
+import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Dchain } from "../typechain-types";
+import { Dchain, MockUSDT } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("Dchain", function () {
     let dchain: Dchain;
+    let mockUSDT: MockUSDT;
     let owner: HardhatEthersSigner, supplier: HardhatEthersSigner, retailer: HardhatEthersSigner, transporter: HardhatEthersSigner, otherAccount: HardhatEthersSigner;
 
     before(async function () {
         [owner, supplier, retailer, transporter, otherAccount] = await ethers.getSigners();
 
-        // Deploy Dchain contract
+        // Deploy MockUSDT contract
+        const MockUSDTFactory = await ethers.getContractFactory("MockUSDT");
+        mockUSDT = await MockUSDTFactory.deploy() as MockUSDT;
+
+        // Deploy Dchain contract with MockUSDT address
         const DchainFactory = await ethers.getContractFactory("Dchain");
-        dchain = await DchainFactory.deploy() as Dchain;
+        dchain = await DchainFactory.deploy(mockUSDT.target) as Dchain;
+
+        // Allocate some MockUSDT to the supplier and retailer for testing
+        await mockUSDT.connect(supplier).mint();
+        await mockUSDT.connect(retailer).mint();
+
     });
 
     describe("Dchain", function () {
@@ -25,15 +35,13 @@ describe("Dchain", function () {
                 transporter: transporter.address,
                 retailer: retailer.address,
                 paymentType: 1, // Preship
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.ZeroHash
             };
 
             await dchain.connect(supplier).createShipment(shipmentDetails);
 
             const shipment = await dchain.shipments(1);
-
-   
 
             expect(shipment.origin).to.equal("New York");
             expect(shipment.destination).to.equal("Los Angeles");
@@ -52,7 +60,7 @@ describe("Dchain", function () {
                 transporter: transporter.address,
                 retailer: retailer.address,
                 paymentType: 1, // Preship
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.encodeBytes32String("Sensitive Data")
             };
 
@@ -69,31 +77,30 @@ describe("Dchain", function () {
 
         it("should emit ShipmentCreated event for public shipment", async function () {
             const shipmentDetails = {
-            shipmentType: 0, // Public
-            origin: "Chicago",
-            destination: "Houston",
-            supplier: supplier.address,
-            transporter: transporter.address,
-            retailer: retailer.address,
-            paymentType: 1, // Preship
-            amount: ethers.parseEther("1"),
-            data: ethers.ZeroHash
+                shipmentType: 0, // Public
+                origin: "Chicago",
+                destination: "Houston",
+                supplier: supplier.address,
+                transporter: transporter.address,
+                retailer: retailer.address,
+                paymentType: 1, // Preship
+                amount: 10 * 10 ** 6,
+                data: ethers.ZeroHash
             };
 
-
             await expect(dchain.connect(supplier).createShipment(shipmentDetails))
-            .to.emit(dchain, "ShipmentCreated");
+                .to.emit(dchain, "ShipmentCreated");
         });
 
-
         it("should update the status of a shipment", async function () {
-            await dchain.connect(retailer).handlePayment(1, { value: ethers.parseEther("2") });
+            // Supplier approves Dchain contract to spend their MockUSDT
+            await mockUSDT.connect(retailer).approve(dchain.target, 1000 * 10 ** 6);
+
+            await dchain.connect(retailer).handlePayment(1);
 
             await dchain.connect(supplier).updateStatus(1, 1); // InTransit
 
             const shipment = await dchain.shipments(1);
-
-            console.log(shipment);
             expect(shipment.status).to.equal(1n); // InTransit
         });
 
@@ -102,16 +109,16 @@ describe("Dchain", function () {
             const shipment = await dchain.shipments(1);
             expect(shipment.status).to.equal(1); // InTransit
         });
+
         it("should emit StatusUpdated event", async function () {
             await expect(dchain.connect(supplier).updateStatus(1, 2)) // Completed
-                .to.emit(dchain, "StatusUpdated")
+                .to.emit(dchain, "StatusUpdated");
         });
 
         it("should not allow unauthorized users to update shipment status", async function () {
             await expect(dchain.connect(otherAccount).updateStatus(1, 1)) // InTransit
                 .to.be.revertedWith("Not authorized");
         });
-
 
         it("should handle payment correctly for preship", async function () {
             const shipmentDetails = {
@@ -122,14 +129,16 @@ describe("Dchain", function () {
                 transporter: transporter.address,
                 retailer: retailer.address,
                 paymentType: 1, // Preship
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.ZeroHash
             };
 
             await dchain.connect(supplier).createShipment(shipmentDetails);
-            await dchain.handlePayment(4, { value: ethers.parseEther("1") });
 
-            console.log("payment 4", await dchain.payments(2));
+            // Supplier approves Dchain contract to spend their MockUSDT
+            await mockUSDT.connect(retailer).approve(dchain.target, 1000 * 10 ** 6);
+            
+            await dchain.connect(retailer).handlePayment(3);
 
             const payment = await dchain.payments(2);
             expect(payment.amount).to.equal(shipmentDetails.amount);
@@ -145,26 +154,25 @@ describe("Dchain", function () {
                 transporter: transporter.address,
                 retailer: retailer.address,
                 paymentType: 0, // Escrowed
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.ZeroHash
             };
-
-            console.log('paymentbefore:' + await dchain.payments(3));
-            console.log('shipmentBefore:' + await dchain.shipments(5));
+            console.log("shipment before", (await dchain.shipments(5)).origin);
             await dchain.connect(supplier).createShipment(shipmentDetails);
-            console.log('shipmentAfter:' + (await dchain.shipments(5)).paymentType);
+            console.log("shipment after", (await dchain.shipments(5)).paymentType);
 
-            await dchain.handlePayment(5, {value: ethers.parseEther("1")});
-            await dchain.releasePayment(5);
-            console.log('shipmentAfter:' + await dchain.shipments(3));
-            console.log('paymentafter:' + await dchain.payments(3));
-            
+
+            // Retailer approves Dchain contract to spend their MockUSDT
+            await mockUSDT.connect(retailer).approve(dchain.target, 1000 * 10 ** 6);
+
+            await dchain.connect(retailer).handlePayment(5);
+            await dchain.connect(supplier).releasePayment(5);
 
             const payment = await dchain.payments(3);
             expect(payment.status).to.equal(2); // Completed
         });
 
-        it("should fail to create a shipment without valid addresses", async function() {
+        it("should fail to create a shipment without valid addresses", async function () {
             const shipmentDetails1 = {
                 shipmentType: 0, // Public
                 origin: "New York",
@@ -173,7 +181,7 @@ describe("Dchain", function () {
                 transporter: ethers.ZeroAddress,
                 retailer: retailer.address,
                 paymentType: 1, // Preship
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.ZeroHash
             };
 
@@ -185,7 +193,7 @@ describe("Dchain", function () {
                 transporter: transporter.address,
                 retailer: ethers.ZeroAddress,
                 paymentType: 1, // Preship
-                amount: ethers.parseEther("1"),
+                amount: 10 * 10 ** 6,
                 data: ethers.ZeroHash
             };
 
@@ -195,6 +203,5 @@ describe("Dchain", function () {
             await expect(dchain.connect(supplier).createShipment(shipmentDetails2))
                 .to.be.revertedWith("Retailer is required");
         });
-
     });
 });
