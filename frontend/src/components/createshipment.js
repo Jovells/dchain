@@ -23,9 +23,7 @@ const CreateShipment = ({ setShipments, resolveEns }) => {
     const value = e.target.value;
     setInputValue(value);
     const address = await resolveEns(value, setInputValue); 
-    if (address) {
       setAddressValue(address);
-    }
   };
 
   const createShipment = async () => {

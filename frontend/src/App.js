@@ -14,7 +14,7 @@ const App = () => {
 
   // Function to resolve ENS names to addresses
   const resolveEns = async (name) => {
-    let address
+    let address = ""
     if (name.endsWith('.eth')) {
       const web3 = new Web3();
       const ensPlugin = new EnsPlugin(Chain.Mainnet);
@@ -24,7 +24,6 @@ const App = () => {
         address = "Invalid ens name";
       }
       console.log(address);
-
     }
     return address; 
   };
