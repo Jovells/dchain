@@ -30,7 +30,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-blue-500 p-4 flex justify-between items-center">
-      <div className="text-white text-2xl ml-36 font-bold">DCHAIN</div>
+      <Link to="/" className="text-white text-2xl ml-36 font-bold">DCHAIN</Link>
       <div className="flex space-x-10 cursor-pointer text-white hover:text-gray-200 text-lg ml-[-100px]">
         <Link to="/" className="text-white hover:text-gray-200">Home</Link>
         <Link to="/payment" className="text-white hover:text-gray-200">Payment</Link>
