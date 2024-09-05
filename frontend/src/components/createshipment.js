@@ -7,16 +7,25 @@ import dchain from '../dchain.json';
 const CreateShipment = ({ setShipments, resolveEns }) => {
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
+  
   const [supplier, setSupplier] = useState('');
   const [transporter, setTransporter] = useState('');
   const [retailer, setRetailer] = useState('');
+  
+  const [supplierAddress, setSupplierAddress] = useState('');
+  const [transporterAddress, setTransporterAddress] = useState('');
+  const [retailerAddress, setRetailerAddress] = useState('');
+ 
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleInputChange = async (e, setInputValue) => {
+  const handleInputChange = async (e, setInputValue, setAddressValue) => {
     const value = e.target.value;
     setInputValue(value);
-    await resolveEns(value, setInputValue); 
+    const address = await resolveEns(value, setInputValue); 
+    if (address) {
+      setAddressValue(address);
+    }
   };
 
   const createShipment = async () => {
@@ -81,15 +90,20 @@ const CreateShipment = ({ setShipments, resolveEns }) => {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Supplier Address:</label>
-          <input type="text" value={supplier} onChange={(e) => handleInputChange(e, setSupplier)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          <input type="text" placeholder='Input ens or address' value={supplier} onChange={(e) => handleInputChange(e, setSupplier, setSupplierAddress)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          {supplierAddress && <div>{supplierAddress}</div>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Transporter Address:</label>
-          <input type="text" value={transporter} onChange={(e) => handleInputChange(e, setTransporter)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          <input type="text" placeholder='Input ens or address' value={transporter} onChange={(e) => handleInputChange(e, setTransporter, setTransporterAddress)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          {transporterAddress && <div>{transporterAddress}</div>}
+
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Retailer Address:</label>
-          <input type="text" value={retailer} onChange={(e) => handleInputChange(e, setRetailer)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          <input type="text" placeholder='Input ens or address' value={retailer} onChange={(e) => handleInputChange(e, setRetailer, setRetailerAddress)} required className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+          {retailerAddress && <div>{retailerAddress}</div>}
+
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Amount (mUSDT):</label>

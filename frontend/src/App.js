@@ -7,20 +7,23 @@ import Payment from './components/payment';
 import Home from './components/home';
 import Footer from './components/footer';
 import Web3 from 'web3';
-import { EnsPlugin } from '@namespace-ens/web3-plugin-ens';
+import { Chain, EnsPlugin } from '@namespace-ens/web3-plugin-ens';
 
 const App = () => {
   const [shipments, setShipments] = useState([]);
 
   // Function to resolve ENS names to addresses
   const resolveEns = async (name) => {
+    let address
     if (name.endsWith('.eth')) {
-      const web3 = new Web3(window.ethereum);
-      const ensPlugin = new EnsPlugin(web3);
-      await ensPlugin.init();
-      return await ensPlugin.resolveName(name);
+      const web3 = new Web3();
+      const ensPlugin = new EnsPlugin(Chain.Mainnet);
+      web3.registerPlugin(ensPlugin);
+      address = await web3.ens.getAddress(name);
+      console.log(address);
+
     }
-    return name;
+    return address; 
   };
 
   // Function to resolve ENS names in shipments
@@ -31,7 +34,7 @@ const App = () => {
       resolvedShipment.destination = await shipment.destination;
       resolvedShipment.supplier = await resolveEns(shipment.supplier);
       resolvedShipment.transporter = await resolveEns(shipment.transporter);
-      resolvedShipment.retailer = await shipment.retailer;
+      resolvedShipment.retailer = await resolveEns(shipment.retailer);
       return resolvedShipment;
     }));
     setShipments(resolvedShipments);
