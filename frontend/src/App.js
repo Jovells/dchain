@@ -15,7 +15,7 @@ const App = () => {
   // Function to resolve ENS names to addresses
   const resolveEns = async (name) => {
     if (name.endsWith('.eth')) {
-      const web3 = new Web3();
+      const web3 = new Web3(window.ethereum);
       const ensPlugin = new EnsPlugin(web3);
       await ensPlugin.init();
       return await ensPlugin.resolveName(name);
