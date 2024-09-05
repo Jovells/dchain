@@ -4,7 +4,9 @@ import Navbar from './components/navbar';
 import CreateShipment from './components/createshipment'; // Updated import statement
 import { ethers } from 'ethers'; // Add this import statement
 import { Chain, EnsPlugin } from '@namespace-ens/web3-plugin-ens'; // Add ENS plugin import
-import Payment from './components/payment'; // Import Payment component
+import Payment from './components/payment'; 
+import Home from './components/home'; 
+import Footer from './components/footer';
 
 const App = () => {
   const [shipments, setShipments] = useState([]);
@@ -20,14 +22,15 @@ const App = () => {
   };
 
   return (
-    <Router> {/* Wrap the app with Router */}
+    <Router> 
       <Navbar />
       <div className="container mx-auto p-6">
-        <Routes> {/* Use Routes to handle routes */}
-          <Route path="/payment" element={<Payment />} /> {/* Update this line to include Payment component */}
+        <Routes> 
+          <Route path="/home" element={<Home />} /> {/* Corrected component usage */}
+          <Route path="/payment" element={<Payment />} /> 
           <Route path="/shipment" element={
             <>
-              <CreateShipment setShipments={setShipments} resolveEns={resolveEns} /> {/* Pass resolveEns function */}
+              <CreateShipment setShipments={setShipments} resolveEns={resolveEns} /> 
               <div className="mt-12">
                 <h3 className="text-2xl font-semibold mb-4 text-gray-800">Created Shipments</h3>
                 <table className="min-w-full bg-white">
@@ -57,9 +60,10 @@ const App = () => {
               </div>
             </>
           } />
-          <Route path="/" element={<div>Default component or home page goes here</div>} />
+          <Route path="/" element={<Home />} /> {/* Set Home as the default route */}
         </Routes>
       </div>
+      <Footer />
     </Router>
   );
 };
