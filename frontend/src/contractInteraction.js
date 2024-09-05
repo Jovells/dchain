@@ -33,7 +33,7 @@ const createShipment = async (details) => {
         const tx = await dchainContract.methods.createShipment(details).send();
         console.log("Shipment created!", tx);
     } catch (error) {
-        console.error("Error creating shipment:", error);
+        console.error("Error santiagodevrel.ethcreating shipment:", error);
     }
 };
 const handlePayment = async (shipmentId, amount) => {

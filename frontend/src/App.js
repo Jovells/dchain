@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Import Router components
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Navbar from './components/navbar';
-import CreateShipment from './components/createshipment'; // Updated import statement
-import { ethers } from 'ethers'; // Add this import statement
-import { Chain, EnsPlugin } from '@namespace-ens/web3-plugin-ens'; // Add ENS plugin import
-import Payment from './components/payment'; 
-import Home from './components/home'; 
+import CreateShipment from './components/createshipment';
+import { ethers } from 'ethers';
+import Payment from './components/payment';
+import Home from './components/home';
 import Footer from './components/footer';
+import Web3 from 'web3';
+import { EnsPlugin } from '@namespace-ens/web3-plugin-ens';
 
 const App = () => {
   const [shipments, setShipments] = useState([]);
@@ -14,23 +15,42 @@ const App = () => {
   // Function to resolve ENS names to addresses
   const resolveEns = async (name) => {
     if (name.endsWith('.eth')) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const ensPlugin = new EnsPlugin(provider);
+      const web3 = new Web3();
+      const ensPlugin = new EnsPlugin(web3);
+      await ensPlugin.init();
       return await ensPlugin.resolveName(name);
     }
     return name;
   };
 
+  // Function to resolve ENS names in shipments
+  const resolveShipmentsEns = async (shipments) => {
+    const resolvedShipments = await Promise.all(shipments.map(async (shipment) => {
+      const resolvedShipment = { ...shipment };
+      resolvedShipment.origin = await shipment.origin;
+      resolvedShipment.destination = await shipment.destination;
+      resolvedShipment.supplier = await resolveEns(shipment.supplier);
+      resolvedShipment.transporter = await resolveEns(shipment.transporter);
+      resolvedShipment.retailer = await shipment.retailer;
+      return resolvedShipment;
+    }));
+    setShipments(resolvedShipments);
+  };
+
+  useEffect(() => {
+    resolveShipmentsEns(shipments);
+  }, [shipments]);
+
   return (
-    <Router> 
+    <Router>
       <Navbar />
       <div className="container mx-auto p-6">
-        <Routes> 
-          <Route path="/home" element={<Home />} /> {/* Corrected component usage */}
-          <Route path="/payment" element={<Payment />} /> 
+        <Routes>
+          <Route path="/home" element={<Home />} />
+          <Route path="/payment" element={<Payment />} />
           <Route path="/shipment" element={
             <>
-              <CreateShipment setShipments={setShipments} resolveEns={resolveEns} /> 
+              <CreateShipment setShipments={setShipments} resolveEns={resolveEns} />
               <div className="mt-12">
                 <h3 className="text-2xl font-semibold mb-4 text-gray-800">Created Shipments</h3>
                 <table className="min-w-full bg-white">
@@ -60,7 +80,7 @@ const App = () => {
               </div>
             </>
           } />
-          <Route path="/" element={<Home />} /> {/* Set Home as the default route */}
+          <Route path="/" element={<Home />} />
         </Routes>
       </div>
       <Footer />

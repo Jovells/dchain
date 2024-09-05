@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { Web3Provider } from '@ethersproject/providers';
 import dchain from '../dchain.json';
-import { Link } from 'react-router-dom';
+
 
 const CreateShipment = ({ setShipments, resolveEns }) => {
   const [origin, setOrigin] = useState('');
@@ -16,7 +16,7 @@ const CreateShipment = ({ setShipments, resolveEns }) => {
   const handleInputChange = async (e, setInputValue) => {
     const value = e.target.value;
     setInputValue(value);
-    await resolveEns(value, setInputValue); // Resolve ENS name and update input field
+    await resolveEns(value, setInputValue); 
   };
 
   const createShipment = async () => {
@@ -52,7 +52,7 @@ const CreateShipment = ({ setShipments, resolveEns }) => {
 
       console.log('Shipment Details:', shipmentDetails);
 
-      // Call the createShipment function
+      // Calling  the createShipment function
       const tx = await dchainContract.createShipment(shipmentDetails);
       await tx.wait();
 
