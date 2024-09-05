@@ -150,7 +150,7 @@ function Payment() {
         <button
 
           onClick={releasePayment}
-          className=" p-5 text-bold  mb-4 bg-green-500 text-white rounded hover:bg-green-700"
+          className=" p-5 text-bold  mb-4 bg-blue-500 text-white rounded hover:bg-green-700"
 
         >
 

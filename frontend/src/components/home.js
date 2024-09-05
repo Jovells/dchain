@@ -11,8 +11,12 @@ const Home = () => {
           <h1 className="text-5xl font-bold mb-4">Optimize Your Supply Chain</h1>
           <p className="text-lg mb-6">With dchain, streamline your operations and enhance productivity.</p>
 
-          <button className="bg-white text-blue-600 py-2 px-4 rounded hover:bg-gray-200 mr-4">Get Started Now</button>
-          <button className="bg-transparent border border-white py-2 px-4 rounded hover:bg-white hover:text-blue-600">Watch our Video</button>
+          <Link to="/shipment">
+            <button className="bg-white text-blue-600 py-2 px-4 rounded hover:bg-gray-200 mr-4">Get Started Now</button>
+          </Link>
+          <Link to="/shipment">
+            <button className="bg-transparent border border-white py-2 px-4 rounded hover:bg-white hover:text-blue-600">Watch our Video</button>
+          </Link>
         </div>
       </section>
 
