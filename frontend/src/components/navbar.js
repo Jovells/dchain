@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Web3 from "web3";
-
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [account, setAccount] = useState(null);
@@ -29,9 +29,14 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className="bg-blue-500   p-4 flex justify-between items-center">
+    <nav className="bg-blue-500 p-4 flex justify-between items-center">
       <div className="text-white text-2xl ml-36 font-bold">DCHAIN</div>
-      <div className="mr-36">
+      <div className="flex space-x-10 cursor-pointer text-white hover:text-gray-200 text-lg ml-[-100px]">
+        <Link to="/" className="text-white hover:text-gray-200">Home</Link>
+        <Link to="/payment" className="text-white hover:text-gray-200">Payment</Link>
+        <Link to="/shipment" className="text-white hover:text-gray-200">Shipment</Link>
+      </div>
+      <div className="flex space-x-4 mr-36">
         <button
           onClick={connectWallet}
           className="bg-white text-blue-500 p-2 rounded hover:bg-gray-200"
