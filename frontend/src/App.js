@@ -20,6 +20,9 @@ const App = () => {
       const ensPlugin = new EnsPlugin(Chain.Mainnet);
       web3.registerPlugin(ensPlugin);
       address = await web3.ens.getAddress(name);
+      if(address === web3.utils.padLeft(0, 40)){
+        address = "Invalid ens name";
+      }
       console.log(address);
 
     }
